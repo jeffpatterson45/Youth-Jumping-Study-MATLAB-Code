@@ -2,7 +2,7 @@
 
 %% Code will import vertical and standing long jump data from .txt (csv) files, calculate vertical and horizontal power production, and export data in a readable format.
 
-%%
+%
 clear all;
 
 
