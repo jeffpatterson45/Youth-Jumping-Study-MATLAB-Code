@@ -7,7 +7,8 @@ clear all;
 
 
 %% Imports file into MATLAB and creates a char variable of just the name of the file
-FileSelectionPrompt = uigetfile('.txt','Select Text File to Import');
+[FileSelectionPrompt, FilePathName] = uigetfile('.txt','Select Text File to Import');
+ImportFileName = strcat(FilePathName,FileSelectionPrompt);
 % displays to user the name of the file they chose so they can see frame #s
 % and weight of subject in command window
 disp(['User selected ', FileSelectionPrompt]);
@@ -46,7 +47,7 @@ SubjectWeightLbs = str2double(FileSelectionPrompt(SubjectWeightFind1(1)+1:Subjec
 
     
 %% Calls importfile.m function, creates variables Time, Fx, Fy, and Fz
-[Time, Fx, Fy, Fz] = importfile(FileSelectionPrompt);
+[Time, Fx, Fy, Fz] = importfile(ImportFileName);
 
 
 %% NOT USING BECAUSE BELOW IS BETTER. 
