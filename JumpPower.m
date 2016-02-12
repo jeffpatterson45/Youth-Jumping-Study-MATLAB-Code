@@ -1,13 +1,14 @@
 %% Jeff Patterson - Independent Study with Patrick Rider - Spring 2016
 
-%% Code will import vertical and standing long jump data from .txt (csv) files, calculate vertical and horizontal power production, and export data in a readable format.
+%% Code will import vertical and standing long jump data from .txt files, calculate vertical and horizontal power production, and export data in a readable format.
 
-%
+%%
 clear all;
-
+close all;
 
 %% Imports file into MATLAB and creates a char variable of just the name of the file
 [FileSelectionPrompt, FilePathName] = uigetfile('.txt','Select Text File to Import');
+% Concatenates the file path name and the file selection prompt names
 ImportFileName = strcat(FilePathName,FileSelectionPrompt);
 % displays to user the name of the file they chose so they can see frame #s
 % and weight of subject in command window
@@ -23,9 +24,7 @@ FrameNumberFind = find(FileSelectionPrompt == ',');
 % First frame number is always right before the first comma [(1)-1], second
 % frame number is always right after first comma [(1)+1], and third frame
 % number is always right after second comma [(2)+1].
-FrameNumber1 = str2double(FileSelectionPrompt(FrameNumberFind(1)-1));
-FrameNumber2 = str2double(FileSelectionPrompt(FrameNumberFind(1)+1));
-FrameNumber3 = str2double(FileSelectionPrompt(FrameNumberFind(2)+1));
+FrameNumbers = [str2double(FileSelectionPrompt(FrameNumberFind(1)-1)); str2double(FileSelectionPrompt(FrameNumberFind(1)+1)); str2double(FileSelectionPrompt(FrameNumberFind(2)+1))];
 
 % SubjectWeightFind1 finds the semi-colon in the filename, Find2 finds the
 % l in "lbs", then SubjectWeightLbs is what is in between those values.
@@ -34,7 +33,15 @@ SubjectWeightFind1 = find(FileSelectionPrompt == ';');
 SubjectWeightFind2 = find(FileSelectionPrompt == 'l');
 SubjectWeightLbs = str2double(FileSelectionPrompt(SubjectWeightFind1(1)+1:SubjectWeightFind2(1)-1));
 
-    
+
+%% Calculate mass (kgs) and force (N) of subject
+% Calculate mass (kgs) from weight (lbs). Conversion factor: 1 lb = .453592 kg 
+SubjectMass = SubjectWeightLbs*.453592;
+% Convert mass (kgs) to force (N). Conversion factor: g
+SubjectForce = SubjectMass*9.80665;
+
+
+
 %% NOT USING ANYMORE, PRONE TO USER ERROR. Prompts user to enter in frame numbers/weight for subject
 % FrameNumbers = inputdlg({'Enter First Frame Number', 'Enter Second Frame Number', 'Enter Third Frame Number'}, 'Frame Numbers');
 % % sets FrameNumber1, 2, and 3 equal to the first, second, and third #s
@@ -50,7 +57,7 @@ SubjectWeightLbs = str2double(FileSelectionPrompt(SubjectWeightFind1(1)+1:Subjec
 [Time, Fx, Fy, Fz] = importfile(ImportFileName);
 
 
-%% NOT USING BECAUSE BELOW IS BETTER. 
+%% NOT USING BECAUSE BELOW IS MORE ACCURATE. 
 % Equation from calibration curve is y = 11.423x - 11.513 where y is mass
 % % kg) and x is analog voltage. Turns analog data from imported file into
 % % mass, then into force by multiplying by g (9.81m/s^2), multipled by 2
@@ -69,4 +76,27 @@ Fx_Force = Fx / (.000001*10*.34752522*2000);
 Fy_Force = Fy / (.000001*10*.34516216*2000);
 Fz_Force = Fz / (.000001*10*.08814228*2000);
 
+
+
+%% for loop
+
+
+for i=1:3;
+    
+
+    %% Make Plots
+    
+    % Make FrameNumber1 plot of Fz_Force vs Time
+    figure(i);
+    plot(Time((12000*(FrameNumbers(i)-1)+FrameNumbers(i)):(12000*(FrameNumbers(i))+(FrameNumbers(i)-1))),Fz_Force((12000*(FrameNumbers(i)-1)+FrameNumbers(i)):(12000*(FrameNumbers(i))+(FrameNumbers(i)-1))));
+    
+    
+    %% Get input for calculations
+    % NEED TO FIGURE OUT A WAY TO GET THE FRAME BASELINE VALUES BELOW TO BE
+    % ACTUAL INDEX VALUES, TRY LOOKING AT PLOTTING FRAMES INSTEAD OF TIME
+    [xFrameBaseline] = int64(ginput(2));
+    xFrameBaselines(:,i) = xFrameBaseline(:,1);
+    
+ i = i + 1;
+end;
 
