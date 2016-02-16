@@ -75,11 +75,10 @@ SubjectForce = SubjectMass*9.80665;
 Fx_Force = Fx / (.000001*10*.34752522*2000);
 Fy_Force = Fy / (.000001*10*.34516216*2000);
 Fz_Force = Fz / (.000001*10*.08814228*2000);
+% Multiplies Time by 1000 to make ginput (below) work appropriately
+Time1000 = Time*1000;
 
-
-
-%% for loop
-
+%% for loop that finds baseline values for the subject's Z force on the forceplate. Will be subtracted out when calculating impulse
 
 for i=1:3;
     
@@ -87,16 +86,20 @@ for i=1:3;
     %% Make Plots
     
     % Make FrameNumber1 plot of Fz_Force vs Time
-    figure(i);
-    plot(Time((12000*(FrameNumbers(i)-1)+FrameNumbers(i)):(12000*(FrameNumbers(i))+(FrameNumbers(i)-1))),Fz_Force((12000*(FrameNumbers(i)-1)+FrameNumbers(i)):(12000*(FrameNumbers(i))+(FrameNumbers(i)-1))));
-    
+    fig = figure(i);
+    set (fig, 'Units', 'normalized', 'Position', [0,0,1,1]);
+    plot(Time1000((12000*(FrameNumbers(i)-1)+FrameNumbers(i)):(12000*(FrameNumbers(i))+(FrameNumbers(i)-1))),Fz_Force((12000*(FrameNumbers(i)-1)+FrameNumbers(i)):(12000*(FrameNumbers(i))+(FrameNumbers(i)-1))));
+    title(['\fontsize{16}PICK TWO POINTS (LEFT TO RIGHT) THAT REPRESENT A GOOD BASELINE VALUE OF THE PERSON ON THE FORCEPLATE']);
     
     %% Get input for calculations
     % NEED TO FIGURE OUT A WAY TO GET THE FRAME BASELINE VALUES BELOW TO BE
     % ACTUAL INDEX VALUES, TRY LOOKING AT PLOTTING FRAMES INSTEAD OF TIME
     [xFrameBaseline] = int64(ginput(2));
-    xFrameBaselines(:,i) = xFrameBaseline(:,1);
-    
+    StartStopFrames(:,i) = xFrameBaseline(:,1);
+ 
  i = i + 1;
 end;
+
+
+
 
