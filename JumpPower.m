@@ -80,6 +80,9 @@ Time1000 = Time*1000;
 
 %% for loop that finds baseline values for the subject's Z force on the forceplate. Will be subtracted out when calculating impulse
 
+Baseline = zeros(3,1);
+
+
 for i=1:3;
     
 
@@ -91,13 +94,36 @@ for i=1:3;
     plot(Time1000((12000*(FrameNumbers(i)-1)+FrameNumbers(i)):(12000*(FrameNumbers(i))+(FrameNumbers(i)-1))),Fz_Force((12000*(FrameNumbers(i)-1)+FrameNumbers(i)):(12000*(FrameNumbers(i))+(FrameNumbers(i)-1))));
     title(['\fontsize{16}PICK TWO POINTS (LEFT TO RIGHT) THAT REPRESENT A GOOD BASELINE VALUE OF THE PERSON ON THE FORCEPLATE']);
     
-    %% Get input for calculations
-    % NEED TO FIGURE OUT A WAY TO GET THE FRAME BASELINE VALUES BELOW TO BE
-    % ACTUAL INDEX VALUES, TRY LOOKING AT PLOTTING FRAMES INSTEAD OF TIME
+    % Get input for calculations
     [xFrameBaseline] = int64(ginput(2));
-    StartStopFrames(:,i) = xFrameBaseline(:,1);
- 
- i = i + 1;
+    StartStopBaseline(:,i) = xFrameBaseline(:,1);
+    
+    % defining start and stop frames based off person's clicks
+    start = (12000*(FrameNumbers(i)-1))+FrameNumbers(i)+StartStopBaseline(1,i);
+    stop = start+StartStopBaseline(2,i)-StartStopBaseline(1,i);
+    
+    % Calculate average body weight from user input
+    Baseline(i,1) = mean(Fz_Force(start:stop),'omitnan');
+    close all;
+    
+    
+end;
+
+
+%% for loop that gets beginning and end of jump, works same as above
+
+for j=1:3;
+    fig = figure(j);
+    set (fig,'Units', 'normalized', 'Position', [0,0,1,1]);
+    plot(Time1000((12000*(FrameNumbers(j)-1)+FrameNumbers(j)):(12000*(FrameNumbers(j))+(FrameNumbers(j)-1))),Fz_Force((12000*(FrameNumbers(j)-1)+FrameNumbers(j)):(12000*(FrameNumbers(j))+(FrameNumbers(j)-1))));
+    title(['\fontsize{16}CLICK RIGHT AT THE BEGINNING OF THE JUMP AND RIGHT AS THE PERSON LEAVES THE FORCEPLATE']);
+    
+    [xJumpTimes] = int64(ginput(2));
+    JumpStartStop(:,j) = xJumpTimes(:,1);
+    
+    close all;
+    
+    
 end;
 
 
