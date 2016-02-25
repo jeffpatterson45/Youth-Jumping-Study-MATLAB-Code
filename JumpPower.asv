@@ -140,7 +140,7 @@ for j=1:3;
     
     % need to divide by 1000 because Time1000 is x1000
     Impulse(j,1) = trapz(Fz_Force_Offset(StartJump:StopJump))/1000;
-    Power(j,1) = Baseline(j,1)*Impulse(j,1)/SubjectMass;
+    Power(j,i) = 
     
     
     
