@@ -115,9 +115,13 @@ end;
 
 %% for loop that gets beginning and end of jump, works same as above
 
-%Impulse and Power matrices
+%Defining variables
 Impulse = zeros(3,1);
-Power = zeros(3,1);
+StartJump = zeros(3,1);
+StopJump = zeros(3,1);
+DeltaVelocity = zeros(3,1);
+PeakPower = zeros(3,1);
+
 
 for j=1:3;
     fig = figure(j);
@@ -133,25 +137,23 @@ for j=1:3;
     %%subtracts out impulse from bodyweight calculated above
     
     
-    StartJump = (12000*(FrameNumbers(j)-1))+FrameNumbers(j)+JumpStartStop(1,j);
-    StopJump = (12000*(FrameNumbers(j)-1))+FrameNumbers(j)+JumpStartStop(2,j);
+    StartJump(j,1) = (12000*(FrameNumbers(j)-1))+FrameNumbers(j)+JumpStartStop(1,j);
+    StopJump(j,1) = (12000*(FrameNumbers(j)-1))+FrameNumbers(j)+JumpStartStop(2,j);
     
     Fz_Force_Offset = Fz_Force - Baseline(j,1);
     
     % need to divide by 1000 because Time1000 is x1000
-    Impulse(j,1) = trapz(Fz_Force_Offset(StartJump:StopJump))/1000;
-    Power(j,1) = Baseline(j,1)*Impulse(j,1)/SubjectMass;
+    Impulse(j,1) = trapz(Fz_Force_Offset(StartJump(j,1):StopJump(j,1)))/1000;
     
-    
-    
+    %Calculates change in velocity by dividing impulse by the mass
+    DeltaVelocity(j,1) = Impulse(j,1)/(SubjectMass);
+
     close all;
     
+    %Peak power calculation, needs updated
+    PeakPower(j,1) = max(Fz_Force(StartJump(j,1):StopJump(j,1)))*DeltaVelocity(j,1);
     
 end;
-
-
-
-
 
 
 
