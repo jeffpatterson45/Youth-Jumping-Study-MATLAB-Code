@@ -82,8 +82,12 @@ Time1000 = Time*1000;
 
 %% for loop that finds baseline values for the subject's Z force on the forceplate. Will be subtracted out when calculating impulse
 
-% Creates Baseline matrix to be filled below
+% Defining variables
 Baseline = zeros(3,1);
+
+StartBaseline = zeros(3,1);
+
+StopBaseline = zeros(3,1);
 
 
 for i=1:3;
@@ -102,11 +106,11 @@ for i=1:3;
     StartStopBaseline(:,i) = xFrameBaseline(:,1);
     
     % defining start and stop frames based off person's clicks
-    StartBaseline = (12000*(FrameNumbers(i)-1))+FrameNumbers(i)+StartStopBaseline(1,i);
-    StopBaseline = StartBaseline+StartStopBaseline(2,i)-StartStopBaseline(1,i);
+    StartBaseline(i,1) = (12000*(FrameNumbers(i)-1))+FrameNumbers(i)+StartStopBaseline(1,i);
+    StopBaseline(i,1) = StartBaseline(i,1)+StartStopBaseline(2,i)-StartStopBaseline(1,i);
     
     % Calculate average body weight from user input
-    Baseline(i,1) = mean(Fz_Force(StartBaseline:StopBaseline),'omitnan');
+    Baseline(i,1) = mean(Fz_Force(StartBaseline(i,1):StopBaseline(i,1)),'omitnan');
     close all;
     
     
@@ -146,12 +150,12 @@ for j=1:3;
     Impulse(j,1) = trapz(Fz_Force_Offset(StartJump(j,1):StopJump(j,1)))/1000;
     
     %Calculates change in velocity by dividing impulse by the mass
-    DeltaVelocity(j,1) = Impulse(j,1)/(SubjectMass);
+    DeltaVelocity(j,1) = Impulse(j,1)/(Baseline(j,1)*.10197162129);
 
     close all;
     
     %Peak power calculation, needs updated
-    PeakPower(j,1) = max(Fz_Force(StartJump(j,1):StopJump(j,1)))*DeltaVelocity(j,1);
+    PeakPower(j,1) = max(Fz_Force_Offset(StartJump(j,1):StopJump(j,1)))*DeltaVelocity(j,1);
     
 end;
 
