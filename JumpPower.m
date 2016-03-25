@@ -99,7 +99,7 @@ for i=1:3;
     fig = figure(i);
     set (fig, 'Units', 'normalized', 'Position', [0,0,1,1]);
     plot(Time1000((12000*(FrameNumbers(i)-1)+FrameNumbers(i)):(12000*(FrameNumbers(i))+(FrameNumbers(i)-1))),Fz_Force((12000*(FrameNumbers(i)-1)+FrameNumbers(i)):(12000*(FrameNumbers(i))+(FrameNumbers(i)-1))));
-    title(['\fontsize{16}PICK TWO POINTS (LEFT TO RIGHT) THAT REPRESENT A GOOD BASELINE VALUE OF THE PERSON ON THE FORCEPLATE']);
+    title('\fontsize{16}PICK TWO POINTS (LEFT TO RIGHT) THAT REPRESENT A GOOD BASELINE VALUE OF THE PERSON ON THE FORCEPLATE');
     
     % Get input for calculations
     [xFrameBaseline] = int64(ginput(2));
@@ -123,9 +123,6 @@ end;
 Impulse = zeros(3,1);
 StartJump = zeros(3,1);
 StopJump = zeros(3,1);
-DeltaVelocity = zeros(3,1);
-PeakPower = zeros(3,1);
-
 
 for j=1:3;
     fig = figure(j);
@@ -149,15 +146,54 @@ for j=1:3;
     % need to divide by 1000 because Time1000 is x1000
     Impulse(j,1) = trapz(Fz_Force_Offset(StartJump(j,1):StopJump(j,1)))/1000;
     
-    %Calculates change in velocity by dividing impulse by the mass
-    DeltaVelocity(j,1) = Impulse(j,1)/(Baseline(j,1)*.10197162129);
+   
 
     close all;
     
-    %Peak power calculation, needs updated
-    PeakPower(j,1) = max(Fz_Force_Offset(StartJump(j,1):StopJump(j,1)))*DeltaVelocity(j,1);
     
+ 
 end;
+
+
+
+%%Trying to figure out Peak Power by only doing one trial at a time.
+
+
+
+
+
+
+Start = StartJump(1,1);
+Stop = StopJump(1,1);
+JumpTime(1,1) = StopJump(1,1)-StartJump(1,1);
+VelocityMe = zeros(JumpTime(1,1),1);
+VelocityDomire = zeros(JumpTime(1,1),1);
+Power = zeros(JumpTime(1,1),1);
+
+Begin = 1;
+
+while Start < Stop;
+    
+    VelocityMe(Begin+1) = VelocityMe(Begin) + Fz_Force_Offset(Start)*.001/(Baseline(1,1)*.10197162129);
+ 
+    VelocityDomire(Begin+1) = trapz(Fz_Force_Offset(StartJump(1,1):(StartJump(1,1)+Begin)))/1000/(Baseline(1,1)*.10197162129);
+    
+    Power(Begin) = Fz_Force_Offset(Start)*VelocityDomire(Begin);
+    
+    
+    Begin = Begin + 1;
+    Start = Start + 1;
+end
+
+
+%     %Calculates take off velocity by dividing impulse by the mass
+%     TakeOffVelocity(j,1) = Impulse(j,1)/(Baseline(j,1)*.10197162129);
+%
+%     %Peak power calculation
+%     PeakPower(j,1) = max(Fz_Force_Offset(StartJump(j,1):StopJump(j,1)))*TakeOffVelocity(j,1);
+%
+
+
 
 
 
