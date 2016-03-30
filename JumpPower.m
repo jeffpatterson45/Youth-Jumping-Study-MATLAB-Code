@@ -32,6 +32,10 @@ FrameNumbers = [str2double(FileSelectionPrompt(FrameNumberFind(1)-1)); str2doubl
 SubjectWeightFind1 = find(FileSelectionPrompt == ';');
 SubjectWeightFind2 = find(FileSelectionPrompt == 'l');
 SubjectWeightLbs = str2double(FileSelectionPrompt(SubjectWeightFind1(1)+1:SubjectWeightFind2(1)-1));
+% same thing for Subject #
+SubjectNumberFind1 = find(FileSelectionPrompt == 'P');
+SubjectNumberFind2 = find(FileSelectionPrompt == ' ');
+SubjectNumber = str2double(FileSelectionPrompt(SubjectNumberFind1(1)+1:SubjectNumberFind2(1)-1));
 
 
 %% Calculate mass (kgs) and force (N) of subject
@@ -156,35 +160,41 @@ end;
 
 
 
-%%Trying to figure out Peak Power by only doing one trial at a time.
+%%for and while loops that calculate instantaneous velocity in two
+%%different ways (Domire's uses trapz which is more accurate), then uses
+%%the Fz_Force_Offset to calculate power at each moment in time. Peak and
+%%Average power can then be found by doing max() and mean(), respectively
 
+avgPower = zeros(3,1);
+peakPower = zeros(3,1);
+JumpTime = zeros(3,1);
 
-
-
-
-
-Start = StartJump(1,1);
-Stop = StopJump(1,1);
-JumpTime(1,1) = StopJump(1,1)-StartJump(1,1);
-VelocityMe = zeros(JumpTime(1,1),1);
-VelocityDomire = zeros(JumpTime(1,1),1);
-Power = zeros(JumpTime(1,1),1);
-
-Begin = 1;
-
-while Start < Stop;
+for i = 1:3
     
-    VelocityMe(Begin+1) = VelocityMe(Begin) + Fz_Force_Offset(Start)*.001/(Baseline(1,1)*.10197162129);
- 
-    VelocityDomire(Begin+1) = trapz(Fz_Force_Offset(StartJump(1,1):(StartJump(1,1)+Begin)))/1000/(Baseline(1,1)*.10197162129);
+    Start = StartJump(i,1);
+    Stop = StopJump(i,1);
+    JumpTime(i,1) = StopJump(i,1)-StartJump(i,1);
+    VelocityMe = zeros(JumpTime(i,1),1);
+    VelocityDomire = zeros(JumpTime(i,1),1);
+    Power = zeros(JumpTime(i,1),1);
     
-    Power(Begin) = Fz_Force_Offset(Start)*VelocityDomire(Begin);
+    Begin = 1;
     
+    while Start < Stop;
+        
+        VelocityMe(Begin+1) = VelocityMe(Begin) + Fz_Force_Offset(Start)*.001/(Baseline(i,1)*.10197162129);
+        
+        VelocityDomire(Begin+1) = trapz(Fz_Force_Offset(StartJump(i,1):(StartJump(i,1)+Begin)))/1000/(Baseline(i,1)*.10197162129);
+        
+        Power(Begin) = Fz_Force_Offset(Start)*VelocityDomire(Begin);
+        
+        Begin = Begin + 1;
+        Start = Start + 1;
+    end
     
-    Begin = Begin + 1;
-    Start = Start + 1;
+    avgPower(i,1) = mean(Power);
+    peakPower(i,1) = max(Power);
 end
-
 
 %     %Calculates take off velocity by dividing impulse by the mass
 %     TakeOffVelocity(j,1) = Impulse(j,1)/(Baseline(j,1)*.10197162129);
@@ -192,6 +202,51 @@ end
 %     %Peak power calculation
 %     PeakPower(j,1) = max(Fz_Force_Offset(StartJump(j,1):StopJump(j,1)))*TakeOffVelocity(j,1);
 %
+
+
+%% Write to excel file
+% writes to sheet #1
+sheet = 1;
+
+% need to convert Subject Number to a string, added 1 so there's 1 line at
+% the top of the excel sheet for column headers
+SubNum = num2str(SubjectNumber+1);
+
+% xlrange sets the range for the cells needed
+xlrangeSubNum = strcat('A',SubNum);
+
+%writes to Excel. (filename, data I want to send, sheet #, cell range);
+xlswrite('X:\Research\Youth Jumping Study\Patterson\JumpingResults.xlsx', SubjectNumber, sheet, xlrangeSubNum);
+
+% same process for variables below
+xlrangeSubMass = strcat('B',SubNum);
+xlswrite('X:\Research\Youth Jumping Study\Patterson\JumpingResults.xlsx', SubjectMass, sheet, xlrangeSubMass);
+
+xlrangeSubPeakPower1 = strcat('C',SubNum);
+xlrangeSubPeakPower2 = strcat('D',SubNum);
+xlrangeSubPeakPower3 = strcat('E',SubNum);
+xlswrite('X:\Research\Youth Jumping Study\Patterson\JumpingResults.xlsx', peakPower(1,1), sheet, xlrangeSubPeakPower1);
+xlswrite('X:\Research\Youth Jumping Study\Patterson\JumpingResults.xlsx', peakPower(2,1), sheet, xlrangeSubPeakPower2);
+xlswrite('X:\Research\Youth Jumping Study\Patterson\JumpingResults.xlsx', peakPower(3,1), sheet, xlrangeSubPeakPower3);
+
+xlrangeSubAvgPower1 = strcat('F',SubNum);
+xlrangeSubAvgPower2 = strcat('G',SubNum);
+xlrangeSubAvgPower3 = strcat('H',SubNum);
+xlswrite('X:\Research\Youth Jumping Study\Patterson\JumpingResults.xlsx', avgPower(1,1), sheet, xlrangeSubAvgPower1);
+xlswrite('X:\Research\Youth Jumping Study\Patterson\JumpingResults.xlsx', avgPower(2,1), sheet, xlrangeSubAvgPower2);
+xlswrite('X:\Research\Youth Jumping Study\Patterson\JumpingResults.xlsx', avgPower(3,1), sheet, xlrangeSubAvgPower3);
+
+
+
+
+
+
+%% EXPORT FILE TO MAT
+% m = matfile('X:\Research\Youth Jumping Study\Patterson\Youth-Jumping-Study-MATLAB-Code\JumpResults.mat', 'Writable',true);
+% 
+% m.avgPower = horzcat(m.avgPower, avgPower);
+% m.peakPower = horzcat(m.peakPower, peakPower);
+
 
 
 
